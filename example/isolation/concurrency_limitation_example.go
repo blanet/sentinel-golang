@@ -35,19 +35,19 @@ func main() {
 	}
 
 	for i := 0; i < 15; i++ {
-		go func() {
+		go func(batchNum int) {
 			for {
 				e, b := sentinel.Entry("abc", sentinel.WithBatchCount(1))
 				if b != nil {
-					logging.Info("[Isolation] Blocked", "reason", b.BlockType().String(), "rule", b.TriggeredRule(), "snapshot", b.TriggeredValue())
-					time.Sleep(time.Duration(rand.Uint64()%20) * time.Millisecond)
+					logging.Warn("[Isolation] Blocked", "batch", batchNum, "reason", b.BlockType().String(), "rule", b.TriggeredRule(), "snapshot", b.TriggeredValue())
+					time.Sleep(time.Duration(rand.Uint64()%5+1) * time.Second)
 				} else {
-					logging.Info("[Isolation] Passed")
-					time.Sleep(time.Duration(rand.Uint64()%20) * time.Millisecond)
+					logging.Info("[Isolation] Passed", "batch", batchNum)
+					time.Sleep(time.Duration(rand.Uint64()%5+1) * time.Second)
 					e.Exit()
 				}
 			}
-		}()
+		}(i)
 	}
 	<-ch
 }
